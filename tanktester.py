@@ -1,14 +1,18 @@
 ##!/usr/bin/python
-import os 
-os.system('clear') # clear screen
-import serial #Libraries
-import time
 import datetime
+import os
 import pigpio
+import serial
 import sys
+import time
+
 import dropbox
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError, AuthError
+
+# clear screen
+os.system('clear')
+
 TOKEN = ''
 pi = pigpio.pi() #initialize servo style ESC control
 MIN_THROTTLE = 1000

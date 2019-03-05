@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 import datetime
 import os
-import pigpio
-import serial
 import sys
 import time
 
 import dropbox
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError, AuthError
+
+import pigpio
+import serial
 
 # DEFAULT VALUES
 # Dropbox token

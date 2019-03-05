@@ -4,6 +4,8 @@ import os
 import sys
 import time
 
+from argparse import ArgumentParser
+
 import dropbox
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError, AuthError
@@ -14,6 +16,42 @@ import serial
 # DEFAULT VALUES
 # Dropbox token
 TOKEN = ''
+
+WELCOME_TEXT = """
+Welcome to Tankinator test platform !
+This script automates tank testing by running the thruster for a set duration while recording data,
+with a long duration pause between each throttle level for tank to settle.
+Push ctrl+c to exit at any time.
+"""
+parser = ArgumentParser(description=WELCOME_TEXT)
+parser.add_argument(
+		"--power-supply-serial",
+		dest="power_supply_serial",
+		required=False,
+		type=str,
+		default="/dev/ttyUSB0",
+		help="Serial to communicate with power supply."
+)
+parser.add_argument(
+		"--force-sensor-serial",
+		dest="force_sensor_serial",
+		required=False,
+		type=str,
+		default="/dev/ttyACM0",
+		help="Serial to communicate with force sensor."
+)
+parser.add_argument(
+		"--force-sensor-serial",
+		dest="rpm_sensor_serial",
+		required=False,
+		type=str,
+		default="/dev/ttyACM1",
+		help="Serial to communicate with force sensor."
+)
+
+args = parser.parse_args()
+
+print(WELCOME_TEXT)
 
 # min and max throttle
 MIN_THROTTLE = 1000
@@ -39,7 +77,7 @@ time.sleep(5)
 # Power supply output
 # scale rs232 to usb
 power_supply_serial = serial.Serial(
-	    port='/dev/ttyUSB0',\
+	    port=args.power_supply_serial,\
 	    baudrate=19200,\
 	    parity=serial.PARITY_NONE,\
 	    stopbits=serial.STOPBITS_ONE,\
@@ -48,7 +86,7 @@ power_supply_serial = serial.Serial(
 
 # Force sensor
 force_sensor_serial = serial.Serial(
-	    port='/dev/ttyACM0',\
+	    port=args.force_sensor_serial,\
 	    baudrate=19200,\
 	    parity=serial.PARITY_NONE,\
 	    stopbits=serial.STOPBITS_ONE,\
@@ -57,15 +95,13 @@ force_sensor_serial = serial.Serial(
 
 # RPM sensor
 rpm_sensor_serial = serial.Serial(
-	    port='/dev/ttyACM1',\
+	    port=args.rpm_sensor_serial,\
             baudrate=19200,\
             parity=serial.PARITY_NONE,\
             stopbits=serial.STOPBITS_ONE,\
             bytesize=serial.EIGHTBITS,\
             timeout=3)
-print "Welcome to Tankinator test platform!! RPM sensing added in 10/2018 by Adam Simko"
-print "This script automates tank testing by running the thruster for a set durationm while recording data, with a long duration pause between each throttle level for tank to settle"
-print "Push ctrl+c to exit at any time. Launch script with /tankinator/./tanktester.py"
+
 force_sensor_serial.flushInput()# clear input before taking reading for rough sync to seperate Arduino :(
 rpm_sensor_serial.flushInput()# same ^^
 scale_level = (force_sensor_serial.readline()) # Arduino configured to output at 10hz of this script

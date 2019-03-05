@@ -10,18 +10,33 @@ import dropbox
 from dropbox.files import WriteMode
 from dropbox.exceptions import ApiError, AuthError
 
+# DEFAULT VALUES
+# Dropbox token
+TOKEN = ''
+
+# min and max throttle
+MIN_THROTTLE = 1000
+MAX_THROTTLE = 2000
+# in TWHOI = 25.25, T200 = 25.625, T500X14 = 26.56
+MECH_VERTICAL = 26.56
+# in advtg = vert/horiz
+MECH_HORIZ = 29.938
+# in T200 = 14, T100 = 12
+POLE_COUNT = 14
+
 # clear screen
 os.system('clear')
 
-TOKEN = ''
-pi = pigpio.pi() #initialize servo style ESC control
-MIN_THROTTLE = 1000
-MAX_THROTTLE = 2000
-MECH_VERTICAL = float(26.56) #in- TWHOI=25.25  T200=25.625 T500X14=26.56
-MECH_HORIZ = float(29.938) #in  advtg = vert/horiz
-POLE_COUNT = int(14) #integer T200=14 T100=12
-pi.set_servo_pulsewidth(18,MIN_THROTTLE) #initialize
-time.sleep(5) #max must always be more than minimum. Swap motor wires to change direction!
+# initialize raspberry gpio
+pi = pigpio.pi() # initialize servo style ESC control
+pi.set_servo_pulsewidth(18, MIN_THROTTLE) # set initial PWM
+
+# mmax must always be more than minimum.
+# Swap motor wires to change direction!
+time.sleep(5)
+
+# Power supply output
+# scale rs232 to usb
 ser = serial.Serial(#scale rs232 to usb
 	    port='/dev/ttyUSB0',\
 	    baudrate=19200,\

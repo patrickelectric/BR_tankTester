@@ -106,7 +106,7 @@ force_sensor_serial.flushInput()# clear input before taking reading for rough sy
 rpm_sensor_serial.flushInput()# same ^^
 scale_level = (force_sensor_serial.readline()) # Arduino configured to output at 10hz of this script
 scale_level = (rpm_sensor_serial.readline()) #same^^
-print "The current reading of the force sensor is %s"%scale_level
+print("The current reading of the force sensor is %s" % scale_level)
 test_name = raw_input('Enter name of this test: ')
 timenow='{date:%Y.%m.%d %H.%M.%S}.csv'.format( date=datetime.datetime.now() )
 fname = test_name + ' ' + timenow #create filename from user name and time at start of test
@@ -117,9 +117,10 @@ settle_time = 20 #seconds between throttle steps. Change to input if frequently 
 loop_period = 0.1 # 1/ this = hz
 throttle_bump = (MAX_THROTTLE-MIN_THROTTLE)/num_steps # % increase of throttle level
 calc_duration = (float(d_steps)*float(num_steps))+((num_steps-1)*settle_time) 
-print 'test time will be '
-print (calc_duration)
-print 'seconds. %s measurements will be logged. Go make something.'%((float(d_steps)*float(num_steps)) * (1/loop_period))
+print("Test time will be: %d seconds" % calc_duration)
+print("The total number of measurements will be %d." % (d_steps*num_steps/loop_period))
+print("Go make something.")
+
 time.sleep(1)
 f=open("/home/pi/tankinator/BR_tankTester/%s"%fname, "a+") # write header for CSV once
 f.write("Time, Force, Power, Voltage, Current, RPM, PWM, efficiency (g/w)")
@@ -135,7 +136,7 @@ start_time = time.time()
 while (throttle <=MAX_THROTTLE) and (prevthrottle != MAX_THROTTLE): # exit when throttle exceeds 100% microseconds
 	if ((time.time() - start_time)>d_steps) and runmotor == 0: # if the runtime is over
 		pi.set_servo_pulsewidth(18,MIN_THROTTLE) #initialize
-		print 'Letting tank settle for %s seconds'%settle_time
+		print('Letting tank settle for %d seconds' % settle_time)
 		runmotor = 1 #raise flag to allow throttle change
 		if throttle == 2000:
 			break
@@ -157,21 +158,32 @@ while (throttle <=MAX_THROTTLE) and (prevthrottle != MAX_THROTTLE): # exit when 
 		CURRENT = float(power_supply_serial.readline())
 		POWER = VOLTAGE * CURRENT #calculate the useful metric
 	except:
-		print "power supply comm error dude"
+		print("power supply comm error dude")
 	try: #to read the external ADC. Need to update prompts to include lever arm, remove this from Arduino sketch
 		force_sensor_serial.flushInput()# clear input before taking reading for rough sync to seperate Arduino :(
 		input = (force_sensor_serial.readline()) # Arduino configured to output at 10hz of this script
 		FORCE = float(input)/(MECH_VERTICAL/MECH_HORIZ)#add scaling here to include lever arm input, remove from Arduino output
 		efficiency = float(((FORCE*float(453.59))/POWER))
 	except:
-                        print "sorry man, force sensor com error"
+		print("sorry man, force sensor com error")
+
 	try: #to read the external RPM sensor.
 		rpm_sensor_serial.flushInput()# clear input before taking reading for rough sync to seperate Arduino :(
 		input = (rpm_sensor_serial.readline()) # Arduino configured to output at 10hz of this script
 		RPM = 60000000/(float(input)*(POLE_COUNT/2))#Get RPM from filtered period value, incorporate pole count
-		print {"efficiency":efficiency,"PWM":throttle,"RPM":RPM,"CURRENT":CURRENT,"VOLTAGE":VOLTAGE,"POWER":POWER,"FORCE":FORCE,"TIME":datetime.datetime.now().strftime("%H:%M:%S.%f")} #attempt at json readable format
+		# attempt at json readable format
+		print({
+				"efficiency": efficiency,
+				"PWM": throttle,
+				"RPM": RPM,
+				"CURRENT": CURRENT,
+				"VOLTAGE": VOLTAGE,
+				"POWER": POWER,
+				"FORCE": FORCE,
+				"TIME": datetime.datetime.now().strftime("%H:%M:%S.%f")
+			})
 	except:
-			print "sorry man, RPM sensor comm error"
+		print("sorry man, RPM sensor comm error")
 	try: #to log data
 		f=open("/home/pi/tankinator/BR_tankTester/%s"%fname, "a+") #open new file in append mode
 		f.write(datetime.datetime.now().strftime("%H:%M:%S.%f")) # write data in csv format
@@ -193,11 +205,12 @@ while (throttle <=MAX_THROTTLE) and (prevthrottle != MAX_THROTTLE): # exit when 
 		f.close()
 		#print "log file line logged"
 	except:
-		print "data not saved pal"				
+		print("data not saved pal")
 #	time.sleep(loop_period) #unmanaged 10hz as initially tested. may run faster? Too many #s to analyze
 pi.set_servo_pulsewidth(18,MIN_THROTTLE) #turn onff motor post test
 time.sleep(2)
-print "test complete dude"
+print("test complete dude")
+
 # Add OAuth2 access token here.
 # You can generate one for yourself in the App Console.
 # See <https://blogs.dropbox.com/developers/2014/05/generate-an-access-token-for-your-own-account/>
@@ -220,6 +233,7 @@ def backup():# Uploads contents of logfile to Dropbox
             else:
                 print(err)
                 sys.exit()
+
 if __name__ == '__main__':
     # Check for an access token
     if (len(TOKEN) == 0):
@@ -235,4 +249,3 @@ if __name__ == '__main__':
             "access token from the app console on the web.")
     backup()    # Create a backup of the current log file
     print("Data saved to Adam's dropbox by TANKINATOR!!!!!!")
-

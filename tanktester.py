@@ -116,8 +116,9 @@ if type(test_name) != str:
 	print("Error: Test name should be a string!")
 	sys.exit(-1)
 
-timenow='{date:%Y.%m.%d %H.%M.%S}.csv'.format( date=datetime.datetime.now() )
+timenow = '{date:%Y.%m.%d %H.%M.%S}.csv'.format(date=datetime.datetime.now())
 fname = test_name + ' ' + timenow #create filename from user name and time at start of test
+print('File will be created: %s' % fname)
 
 d_steps = input('Duration of each throttle step (seconds) (Adam says 3sec, with 20 second pause between): ')
 if type(d_steps) != float and type(d_steps) != int:

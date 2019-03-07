@@ -107,12 +107,24 @@ rpm_sensor_serial.flushInput()# same ^^
 scale_level = (force_sensor_serial.readline()) # Arduino configured to output at 10hz of this script
 scale_level = (rpm_sensor_serial.readline()) #same^^
 print("The current reading of the force sensor is %s" % scale_level)
-test_name = raw_input('Enter name of this test: ')
+test_name = input('Enter name of this test: ')
+if type(test_name) != str:
+	print("Error: Test name should be a string!")
+	sys.exit(-1)
+
 timenow='{date:%Y.%m.%d %H.%M.%S}.csv'.format( date=datetime.datetime.now() )
 fname = test_name + ' ' + timenow #create filename from user name and time at start of test
-d_steps = input('Duration of each throttle step (seconds) (Adam says 3sec, with 20 second pause between)')
-d_steps = d_steps+1 
-num_steps = input('# of steps from 0 to full throttle (one direction - if wrong, swap 2 motor wires)')
+
+d_steps = input('Duration of each throttle step (seconds) (Adam says 3sec, with 20 second pause between): ')
+if type(d_steps) != float and type(d_steps) != int:
+	print("Error: Duration is not a number!")
+	sys.exit(-1)
+
+num_steps = input('# of steps from 0 to full throttle (one direction - if wrong, swap 2 motor wires): ')
+if type(num_steps) != int:
+	print("Error: Number of steps is not a int!")
+	sys.exit(-1)
+
 settle_time = 20 #seconds between throttle steps. Change to input if frequently varied across tests
 loop_period = 0.1 # 1/ this = hz
 throttle_bump = (MAX_THROTTLE-MIN_THROTTLE)/num_steps # % increase of throttle level

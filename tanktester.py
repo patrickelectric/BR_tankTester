@@ -104,9 +104,13 @@ rpm_sensor_serial = serial.Serial(
 
 force_sensor_serial.flushInput()# clear input before taking reading for rough sync to seperate Arduino :(
 rpm_sensor_serial.flushInput()# same ^^
-scale_level = (force_sensor_serial.readline()) # Arduino configured to output at 10hz of this script
-scale_level = (rpm_sensor_serial.readline()) #same^^
-print("The current reading of the force sensor is %s" % scale_level)
+print("The current reading of the force sensor is %s" % force_sensor_serial.readline())
+print("The current reading of the RPM sensor is %s" % rpm_sensor_serial.readline())
+valid_inputs = input("If the result is valid, please type 'y' ortherwise 'n' and swipe the serial ports in the argument:")
+if type(valid_inputs) != str or valid_inputs != 'y':
+	print("Aborting!")
+	sys.exit(-1)
+
 test_name = input('Enter name of this test: ')
 if type(test_name) != str:
 	print("Error: Test name should be a string!")

@@ -25,28 +25,28 @@ Push ctrl+c to exit at any time.
 """
 parser = ArgumentParser(description=WELCOME_TEXT)
 parser.add_argument(
-		"--power-supply-serial",
-		dest="power_supply_serial",
-		required=False,
-		type=str,
-		default="/dev/ttyUSB0",
-		help="Serial to communicate with power supply."
+        "--power-supply-serial",
+        dest="power_supply_serial",
+        required=False,
+        type=str,
+        default="/dev/ttyUSB0",
+        help="Serial to communicate with power supply."
 )
 parser.add_argument(
-		"--force-sensor-serial",
-		dest="force_sensor_serial",
-		required=False,
-		type=str,
-		default="/dev/ttyACM0",
-		help="Serial to communicate with force sensor."
+        "--force-sensor-serial",
+        dest="force_sensor_serial",
+        required=False,
+        type=str,
+        default="/dev/ttyACM0",
+        help="Serial to communicate with force sensor."
 )
 parser.add_argument(
-		"--force-sensor-serial",
-		dest="rpm_sensor_serial",
-		required=False,
-		type=str,
-		default="/dev/ttyACM1",
-		help="Serial to communicate with force sensor."
+        "--force-sensor-serial",
+        dest="rpm_sensor_serial",
+        required=False,
+        type=str,
+        default="/dev/ttyACM1",
+        help="Serial to communicate with force sensor."
 )
 
 args = parser.parse_args()
@@ -77,25 +77,25 @@ time.sleep(5)
 # Power supply output
 # scale rs232 to usb
 power_supply_serial = serial.Serial(
-	    port=args.power_supply_serial,\
-	    baudrate=19200,\
-	    parity=serial.PARITY_NONE,\
-	    stopbits=serial.STOPBITS_ONE,\
-	    bytesize=serial.EIGHTBITS,\
-	    timeout=3)
+        port=args.power_supply_serial,\
+        baudrate=19200,\
+        parity=serial.PARITY_NONE,\
+        stopbits=serial.STOPBITS_ONE,\
+        bytesize=serial.EIGHTBITS,\
+        timeout=3)
 
 # Force sensor
 force_sensor_serial = serial.Serial(
-	    port=args.force_sensor_serial,\
-	    baudrate=19200,\
-	    parity=serial.PARITY_NONE,\
-	    stopbits=serial.STOPBITS_ONE,\
-	    bytesize=serial.EIGHTBITS,\
-	    timeout=3)
+        port=args.force_sensor_serial,\
+        baudrate=19200,\
+        parity=serial.PARITY_NONE,\
+        stopbits=serial.STOPBITS_ONE,\
+        bytesize=serial.EIGHTBITS,\
+        timeout=3)
 
 # RPM sensor
 rpm_sensor_serial = serial.Serial(
-	    port=args.rpm_sensor_serial,\
+        port=args.rpm_sensor_serial,\
             baudrate=19200,\
             parity=serial.PARITY_NONE,\
             stopbits=serial.STOPBITS_ONE,\
@@ -108,13 +108,13 @@ print("The current reading of the force sensor is %s" % force_sensor_serial.read
 print("The current reading of the RPM sensor is %s" % rpm_sensor_serial.readline())
 valid_inputs = input("If the result is valid, please type 'y' ortherwise 'n' and swipe the serial ports in the argument:")
 if type(valid_inputs) != str or valid_inputs != 'y':
-	print("Aborting!")
-	sys.exit(-1)
+    print("Aborting!")
+    sys.exit(-1)
 
 test_name = input('Enter name of this test: ')
 if type(test_name) != str:
-	print("Error: Test name should be a string!")
-	sys.exit(-1)
+    print("Error: Test name should be a string!")
+    sys.exit(-1)
 
 timenow = '{date:%Y.%m.%d %H.%M.%S}.csv'.format(date=datetime.datetime.now())
 fname = test_name + ' ' + timenow #create filename from user name and time at start of test
@@ -122,109 +122,109 @@ print('File will be created: %s' % fname)
 
 d_steps = input('Duration of each throttle step (seconds) (Adam says 3sec, with 20 second pause between): ')
 if type(d_steps) != float and type(d_steps) != int:
-	print("Error: Duration is not a number!")
-	sys.exit(-1)
+    print("Error: Duration is not a number!")
+    sys.exit(-1)
 
 num_steps = input('# of steps from 0 to full throttle (one direction - if wrong, swap 2 motor wires): ')
 if type(num_steps) != int:
-	print("Error: Number of steps is not a int!")
-	sys.exit(-1)
+    print("Error: Number of steps is not a int!")
+    sys.exit(-1)
 
 settle_time = 20 #seconds between throttle steps. Change to input if frequently varied across tests
 loop_period = 0.1 # 1/ this = hz
 throttle_bump = (MAX_THROTTLE-MIN_THROTTLE)/num_steps # % increase of throttle level
-calc_duration = (float(d_steps)*float(num_steps))+((num_steps-1)*settle_time) 
+calc_duration = d_steps*num_steps + num_steps*settle_time
 print("Test time will be: %d seconds" % calc_duration)
 print("The total number of measurements will be %d." % (d_steps*num_steps/loop_period))
 print("Go make something.")
 
 time.sleep(1)
-f=open("/home/pi/tankinator/BR_tankTester/%s"%fname, "a+") # write header for CSV once
+f = open("/home/pi/tankinator/BR_tankTester/%s" % fname, "a+") # write header for CSV once
 f.write("Time, Force, Power, Voltage, Current, RPM, PWM, efficiency (g/w)")
 f.write('\n')
 f.close()
-LOCALFILE = '%s'%fname #file to backup
-BACKUPPATH = '/%s'%fname
+LOCALFILE = '%s' % fname #file to backup
+BACKUPPATH = '/%s' % fname
 prevthrottle = MIN_THROTTLE
 throttle = MIN_THROTTLE #center point throttle
-runmotor=1 #flag used to control data logging & output
+runmotor = 1 #flag used to control data logging & output
 # note start time
-start_time = time.time()   
-while (throttle <=MAX_THROTTLE) and (prevthrottle != MAX_THROTTLE): # exit when throttle exceeds 100% microseconds
-	if ((time.time() - start_time)>d_steps) and runmotor == 0: # if the runtime is over
-		pi.set_servo_pulsewidth(18,MIN_THROTTLE) #initialize
-		print('Letting tank settle for %d seconds' % settle_time)
-		runmotor = 1 #raise flag to allow throttle change
-		if throttle == 2000:
-			break
-		time.sleep(settle_time)  
-		start_time = time.time()
-	if runmotor==1 and ((time.time()-start_time)<d_steps): #if change is ok and during next run period
-		prevthrottle = throttle #used to limit ramp up
-		while throttle < (prevthrottle + throttle_bump):
-			throttle = throttle + int(throttle_bump) #ramping to not make it shake	
-			pi.set_servo_pulsewidth(18,throttle) #initialize
-		time.sleep(1)# let things settle out before starting log	
-		runmotor = 0 #keep it from increasing again within same period
-	try:  #to talk to power supply
-		power_supply_serial.write('MEASURE:VOLTAGE:DC?') #from documentation.
-		power_supply_serial.write(b'\rL1\r') #sends enter after request to get return
-		VOLTAGE = float(power_supply_serial.readline()) #cast to float
-		power_supply_serial.write('MEASURE:CURRENT:DC?')
-		power_supply_serial.write(b'\rL1\r')
-		CURRENT = float(power_supply_serial.readline())
-		POWER = VOLTAGE * CURRENT #calculate the useful metric
-	except:
-		print("power supply comm error dude")
-	try: #to read the external ADC. Need to update prompts to include lever arm, remove this from Arduino sketch
-		force_sensor_serial.flushInput()# clear input before taking reading for rough sync to seperate Arduino :(
-		input = (force_sensor_serial.readline()) # Arduino configured to output at 10hz of this script
-		FORCE = float(input)/(MECH_VERTICAL/MECH_HORIZ)#add scaling here to include lever arm input, remove from Arduino output
-		efficiency = float(((FORCE*float(453.59))/POWER))
-	except:
-		print("sorry man, force sensor com error")
+start_time = time.time()
+while (throttle <= MAX_THROTTLE) and (prevthrottle != MAX_THROTTLE): # exit when throttle exceeds 100% microseconds
+    if ((time.time() - start_time) > d_steps) and runmotor == 0: # if the runtime is over
+        pi.set_servo_pulsewidth(18, MIN_THROTTLE) #initialize
+        print('Letting tank settle for %d seconds' % settle_time)
+        runmotor = 1 #raise flag to allow throttle change
+        if throttle == 2000:
+            break
+        time.sleep(settle_time)
+        start_time = time.time()
+    if runmotor == 1 and ((time.time()-start_time) < d_steps): #if change is ok and during next run period
+        prevthrottle = throttle #used to limit ramp up
+        while throttle < (prevthrottle + throttle_bump):
+            throttle = throttle + int(throttle_bump) #ramping to not make it shake
+            pi.set_servo_pulsewidth(18, throttle) #initialize
+        time.sleep(1)# let things settle out before starting log
+        runmotor = 0 #keep it from increasing again within same period
+    try:  #to talk to power supply
+        power_supply_serial.write('MEASURE:VOLTAGE:DC?') #from documentation.
+        power_supply_serial.write(b'\rL1\r') #sends enter after request to get return
+        VOLTAGE = float(power_supply_serial.readline()) #cast to float
+        power_supply_serial.write('MEASURE:CURRENT:DC?')
+        power_supply_serial.write(b'\rL1\r')
+        CURRENT = float(power_supply_serial.readline())
+        POWER = VOLTAGE * CURRENT #calculate the useful metric
+    except:
+        print("power supply comm error dude")
+    try: #to read the external ADC. Need to update prompts to include lever arm, remove this from Arduino sketch
+        force_sensor_serial.flushInput()# clear input before taking reading for rough sync to seperate Arduino :(
+        input = float(force_sensor_serial.readline()) # Arduino configured to output at 10hz of this script
+        FORCE = input/MECH_VERTICAL/MECH_HORIZ # add scaling here to include lever arm input, remove from Arduino output
+        efficiency = 453.59*FORCE/POWER
+    except:
+        print("sorry man, force sensor com error")
 
-	try: #to read the external RPM sensor.
-		rpm_sensor_serial.flushInput()# clear input before taking reading for rough sync to seperate Arduino :(
-		input = (rpm_sensor_serial.readline()) # Arduino configured to output at 10hz of this script
-		RPM = 60000000/(float(input)*(POLE_COUNT/2))#Get RPM from filtered period value, incorporate pole count
-		# attempt at json readable format
-		print({
-				"efficiency": efficiency,
-				"PWM": throttle,
-				"RPM": RPM,
-				"CURRENT": CURRENT,
-				"VOLTAGE": VOLTAGE,
-				"POWER": POWER,
-				"FORCE": FORCE,
-				"TIME": datetime.datetime.now().strftime("%H:%M:%S.%f")
-			})
-	except:
-		print("sorry man, RPM sensor comm error")
-	try: #to log data
-		f=open("/home/pi/tankinator/BR_tankTester/%s"%fname, "a+") #open new file in append mode
-		f.write(datetime.datetime.now().strftime("%H:%M:%S.%f")) # write data in csv format
-		f.write(',')
-		f.write("%s"%FORCE)
-		f.write(',')
-		f.write("%s"%POWER)
-		f.write(',')
-		f.write("%s"%VOLTAGE)
-		f.write(',')
-		f.write("%s"%CURRENT)
-		f.write(',')
-		f.write("%s"%RPM)
-		f.write(',')
-		f.write("%s"%throttle)
-		f.write(',')
-		f.write("%s"%efficiency)
-		f.write('\n')
-		f.close()
-		#print "log file line logged"
-	except:
-		print("data not saved pal")
-#	time.sleep(loop_period) #unmanaged 10hz as initially tested. may run faster? Too many #s to analyze
-pi.set_servo_pulsewidth(18,MIN_THROTTLE) #turn onff motor post test
+    try: #to read the external RPM sensor.
+        rpm_sensor_serial.flushInput()# clear input before taking reading for rough sync to seperate Arduino :(
+        input = float(rpm_sensor_serial.readline()) # Arduino configured to output at 10hz of this script
+        RPM = 60000000/(input*(POLE_COUNT/2))#Get RPM from filtered period value, incorporate pole count
+        # attempt at json readable format
+        print({
+                "efficiency": efficiency,
+                "PWM": throttle,
+                "RPM": RPM,
+                "CURRENT": CURRENT,
+                "VOLTAGE": VOLTAGE,
+                "POWER": POWER,
+                "FORCE": FORCE,
+                "TIME": datetime.datetime.now().strftime("%H:%M:%S.%f")
+            })
+    except:
+        print("sorry man, RPM sensor comm error")
+    try: #to log data
+        f = open("/home/pi/tankinator/BR_tankTester/%s" % fname, "a+") #open new file in append mode
+        f.write(datetime.datetime.now().strftime("%H:%M:%S.%f")) # write data in csv format
+        f.write(',')
+        f.write("%s"%FORCE)
+        f.write(',')
+        f.write("%s"%POWER)
+        f.write(',')
+        f.write("%s"%VOLTAGE)
+        f.write(',')
+        f.write("%s"%CURRENT)
+        f.write(',')
+        f.write("%s"%RPM)
+        f.write(',')
+        f.write("%s"%throttle)
+        f.write(',')
+        f.write("%s"%efficiency)
+        f.write('\n')
+        f.close()
+        #print "log file line logged"
+    except:
+        print("data not saved pal")
+#    time.sleep(loop_period) #unmanaged 10hz as initially tested. may run faster? Too many #s to analyze
+pi.set_servo_pulsewidth(18, MIN_THROTTLE) #turn onff motor post test
 time.sleep(2)
 print("test complete dude")
 
